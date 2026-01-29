@@ -1,0 +1,9 @@
+node_modules
+.metro-cache
+metro-cache
+.expo
+.expo-shared
+.eas
+.env
+build-*.apk
+*.apk

@@ -1,0 +1,33 @@
+{
+  "cli": {
+    "version": ">= 16.28.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://shekinahwebapp.eunika.xyz/admin/api",
+        "EXPO_PUBLIC_API_KEY": "79da86d3fec0bd1cf4f05e6815eec345fbcc797de298e10b6260d533c5fe7795",
+        "EXPO_PUBLIC_API_DEBUG": "true",
+        "EXPO_PUBLIC_SOCKET_IO_URL": "https://websocket-app.eunika.xyz/"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "935181078036",
+    "project_id": "shekinah-teacher-app",
+    "storage_bucket": "shekinah-teacher-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:935181078036:android:8b4224e0a5d279c4ee2101",
+        "android_client_info": {
+          "package_name": "com.eunika.shekinahparentapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSJtn7zn4KmHsXjdnXRIckmnU3F91wRoY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:935181078036:android:2a2f97bd8eb60184ee2101",
+        "android_client_info": {
+          "package_name": "com.eunika.shekinahteacherapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSJtn7zn4KmHsXjdnXRIckmnU3F91wRoY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

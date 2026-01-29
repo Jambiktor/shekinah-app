@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Shekinah",
+    "slug": "shekinah-app",
+    "scheme": "shekinah-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F4F7FB"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "softwareKeyboardLayoutMode": "resize",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F4F7FB"
+      },
+      "package": "com.eunika.shekinahapp",
+      "googleServicesFile": "./google-services.json"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4000067e-783c-4cec-982b-ac3ca77081de"
+      }
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#1D4ED8"
+    },
+    "owner": "zeyune",
+    "plugins": [
+      "expo-font",
+      "expo-notifications",
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}
