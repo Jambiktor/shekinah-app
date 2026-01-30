@@ -98,7 +98,7 @@ const AppDrawer = ({
         <View style={styles.drawerHeader}>
           <View style={styles.headerLogo}>
             <Image
-              source={require("../../assets/shekinah-logo.png")}
+              source={require("../../../../assets/shekinah-logo.png")}
               style={styles.headerLogoImage}
               resizeMode="contain"
             />

@@ -74,7 +74,7 @@ const SidebarMenu = ({
             <View style={styles.profileRow}>
               <View style={styles.menuAvatar}>
                 <Image
-                  source={require("../../assets/shekinah-logo.png")}
+                  source={require("../../../../assets/shekinah-logo.png")}
                   style={styles.menuAvatarImage}
                   resizeMode="contain"
                 />

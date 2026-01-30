@@ -1,5 +1,5 @@
 import { Child, LogEntry, Notification } from "../types";
-import { stripHtml } from "./text";
+import { stripHtml } from "../../../shared/helpers/text";
 
 const parseLogType = (value: string) => {
   const normalized = stripHtml(value).toUpperCase();

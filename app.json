@@ -27,20 +27,23 @@
       "package": "com.eunika.shekinahapp",
       "googleServicesFile": "./google-services.json"
     },
-    "extra": {
-      "eas": {
-        "projectId": "4000067e-783c-4cec-982b-ac3ca77081de"
-      }
-    },
     "notification": {
       "icon": "./assets/notification-icon.png",
       "color": "#1D4ED8"
     },
-    "owner": "zeyune",
     "plugins": [
       "expo-font",
       "expo-notifications",
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "EXPO_PUBLIC_API_BASE_URL": "",
+      "EXPO_PUBLIC_API_KEY": "",
+      "EXPO_PUBLIC_API_DEBUG": "",
+      "EXPO_PUBLIC_SOCKET_IO_URL": "",
+      "eas": {
+        "projectId": "00ff0bec-a683-45e5-9511-e51248cac79a"
+      }
+    }
   }
 }

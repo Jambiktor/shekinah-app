@@ -14,7 +14,9 @@ module.exports = () => {
 
   return {
     ...expoConfig,
+    owner: expoConfig.owner ?? "eunikaagency",
     extra: {
+      eas: expoConfig.extra?.eas ?? {},
       ...expoConfig.extra,
       EXPO_PUBLIC_API_BASE_URL: readEnv(
         "EXPO_PUBLIC_API_BASE_URL",
