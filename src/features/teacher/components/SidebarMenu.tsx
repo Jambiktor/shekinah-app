@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Tab } from "../screens/LandingScreen";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type SidebarMenuProps = {
   isVisible: boolean;
@@ -34,6 +35,7 @@ const SidebarMenu = ({
   onSelectTab,
   onLogout,
 }: SidebarMenuProps) => {
+  const { theme } = useTheme();
   if (!isVisible) {
     return null;
   }
@@ -58,6 +60,8 @@ const SidebarMenu = ({
           styles.menuPanel,
           {
             width: menuWidth,
+            backgroundColor: theme.colors.surface,
+            borderRightColor: theme.colors.border,
             transform: [
               {
                 translateX: menuProgress.interpolate({
@@ -70,18 +74,22 @@ const SidebarMenu = ({
         ]}
       >
         <SafeAreaView style={styles.menuSafeArea} edges={["top"]}>
-          <View style={styles.menuHeader}>
+          <View style={[styles.menuHeader, { borderBottomColor: theme.colors.border }]}>
             <View style={styles.profileRow}>
-              <View style={styles.menuAvatar}>
+              <View style={[styles.menuAvatar, { backgroundColor: theme.colors.background }]}>
                 <Image
-                  source={require("../../../../assets/shekinah-logo.png")}
+                  source={
+                    theme.logo_url
+                      ? { uri: theme.logo_url }
+                      : require("../../../../assets/shekinah-logo.png")
+                  }
                   style={styles.menuAvatarImage}
                   resizeMode="contain"
                 />
               </View>
               <View>
-                <Text style={styles.profileName}>{profileName}</Text>
-                <Text style={styles.profileRole}>Teacher</Text>
+                <Text style={[styles.profileName, { color: theme.colors.text }]}>{profileName}</Text>
+                <Text style={[styles.profileRole, { color: theme.colors.text }]}>Teacher</Text>
               </View>
             </View>
           </View>
@@ -92,27 +100,42 @@ const SidebarMenu = ({
                 return (
                   <Pressable
                     key={item.tab}
-                    style={[styles.menuItem, isActive && styles.menuItemActive]}
-                    onPress={() => onSelectTab(item.tab)}
-                  >
-                    <Ionicons
-                      name={item.icon}
-                      size={18}
-                      color={isActive ? "#FFFFFF" : "#6B7D8F"}
-                    />
-                    <Text style={[styles.menuItemLabel, isActive && styles.menuItemLabelActive]}>
-                      {item.label}
-                    </Text>
-                  </Pressable>
-                );
+                    style={[
+                      styles.menuItem,
+                      { backgroundColor: theme.colors.surface },
+                      isActive && { backgroundColor: theme.colors.primary },
+                    ]}
+                      onPress={() => onSelectTab(item.tab)}
+                    >
+                      <Ionicons
+                        name={item.icon}
+                        size={18}
+                        color={isActive ? theme.colors.surface : theme.colors.text}
+                      />
+                      <Text
+                        style={[
+                          styles.menuItemLabel,
+                          { color: isActive ? theme.colors.surface : theme.colors.text },
+                          isActive && styles.menuItemLabelActive,
+                        ]}
+                      >
+                        {item.label}
+                      </Text>
+                    </Pressable>
+                  );
               })}
             </View>
             <View style={styles.menuFooter}>
-              <Pressable style={styles.logoutButton} onPress={onLogout}>
-                <Ionicons name="log-out-outline" size={16} color="#DC2626" />
-                <Text style={styles.logoutText}>Logout</Text>
+              <Pressable
+                style={[styles.logoutButton, { borderColor: theme.colors.border }]}
+                onPress={onLogout}
+              >
+                <Ionicons name="log-out-outline" size={16} color={theme.colors.accent} />
+                <Text style={[styles.logoutText, { color: theme.colors.text }]}>Logout</Text>
               </Pressable>
-              <Text style={styles.menuFooterText}>Version 1.0.0</Text>
+              <Text style={[styles.menuFooterText, { color: theme.colors.text }]}>
+                Version 1.0.0
+              </Text>
             </View>
           </View>
         </SafeAreaView>
@@ -132,9 +155,7 @@ const styles = StyleSheet.create({
   },
   menuPanel: {
     height: "100%",
-    backgroundColor: "#FFFFFF",
     borderRightWidth: 1,
-    borderRightColor: "#E8ECEF",
     shadowColor: "#0F172A",
     shadowOpacity: 0.12,
     shadowRadius: 14,
@@ -149,7 +170,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E8ECEF",
     gap: 16,
   },
   profileRow: {
@@ -161,7 +181,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#F5F7FA",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -172,11 +191,9 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#1A2B3C",
   },
   profileRole: {
     fontSize: 12,
-    color: "#6B7D8F",
     marginTop: 2,
   },
   menuBody: {
@@ -202,16 +219,14 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 12,
     paddingHorizontal: 14,
-    backgroundColor: "#FEF2F2",
+    borderWidth: 1,
   },
   logoutText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#DC2626",
   },
   menuFooterText: {
     fontSize: 11,
-    color: "#9AA8B5",
   },
   menuItem: {
     flexDirection: "row",
@@ -220,19 +235,14 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
     paddingHorizontal: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "transparent",
   },
-  menuItemActive: {
-    backgroundColor: "#4195BA",
-  },
+  menuItemActive: {},
   menuItemLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#6B7D8F",
   },
-  menuItemLabelActive: {
-    color: "#FFFFFF",
-  },
+  menuItemLabelActive: {},
 });
 
 export default SidebarMenu;

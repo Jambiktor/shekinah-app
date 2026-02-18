@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TeacherStudent } from "../types";
 import { formatTimeRange12h, parseTimeRangeToMinutes } from "../helpers/time";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type ClassSession = {
   id: string;
@@ -43,6 +44,7 @@ const ClassesScreen = ({
   onGradeChange,
   students,
 }: Props) => {
+  const { theme } = useTheme();
   const normalizedGradeFilter = gradeFilter === "all" ? "all" : gradeFilter;
   const menuOptions =
     gradeOptions.length > 0
@@ -106,6 +108,8 @@ const ClassesScreen = ({
   }, [classSessions, gradeFilter, normalizedGradeFilter]);
 
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View>
@@ -200,146 +204,147 @@ const ClassesScreen = ({
   );
 };
 
-const styles = StyleSheet.create({
-  gradeSection: {
-    marginBottom: 20,
-  },
-  gradeLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#6B7D8F",
-    marginBottom: 10,
-  },
-  gradePills: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  gradePill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#E1E7ED",
-    backgroundColor: "#FFFFFF",
-  },
-  gradePillActive: {
-    backgroundColor: "#2C77BC",
-    borderColor: "#2C77BC",
-  },
-  gradePillText: {
-    fontSize: 12,
-    color: "#6B7D8F",
-    fontWeight: "600",
-  },
-  gradePillTextActive: {
-    color: "#FFFFFF",
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A2B3C",
-    marginBottom: 4,
-  },
-  sectionSubtitle: {
-    fontSize: 13,
-    color: "#6B7D8F",
-    marginBottom: 18,
-  },
-  cardList: {
-    gap: 12,
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 24,
-    gap: 6,
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1A2B3C",
-  },
-  emptySubtitle: {
-    fontSize: 12,
-    color: "#6B7D8F",
-    textAlign: "center",
-  },
-  classCard: {
-    borderWidth: 1,
-    borderColor: "#E7EDF3",
-    borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-  },
-  classCardOngoing: {
-    borderColor: "#c1e9c8ff",
-    borderWidth: 1,
-    backgroundColor: "#F3FBF6",
-  },
-  classCardDone: {
-    borderColor: "#94A3B8",
-    borderWidth: 2,
-    backgroundColor: "#F8FAFC",
-  },
-  classCardPressed: {
-    backgroundColor: "#F8FAFC",
-  },
-  classCardHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  classCardMeta: {
-    flex: 1,
-    marginRight: 8,
-  },
-  classCardTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1A2B3C",
-    marginBottom: 4,
-  },
-  classCardSubRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  classCardSubtitle: {
-    fontSize: 12,
-    color: "#6B7D8F",
-    fontWeight: "500",
-  },
-  classCardMetaRight: {
-    alignItems: "flex-end",
-    gap: 10,
-  },
-  classCountBadge: {
-    backgroundColor: "#2C77BC",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  classCountText: {
-    color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  classCardChevron: {
-    marginTop: 2,
-  },
-  classTimeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#EEF2F5",
-  },
-  classTimeText: {
-    fontSize: 12,
-    color: "#6B7D8F",
-  },
-});
+const createStyles = (theme: import("../../../shared/theme/types").SchoolTheme) =>
+  StyleSheet.create({
+    gradeSection: {
+      marginBottom: 20,
+    },
+    gradeLabel: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: 10,
+    },
+    gradePills: {
+      flexDirection: "row",
+      gap: 10,
+    },
+    gradePill: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.surface,
+    },
+    gradePillActive: {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+    },
+    gradePillText: {
+      fontSize: 12,
+      color: theme.colors.text,
+      fontWeight: "600",
+    },
+    gradePillTextActive: {
+      color: theme.colors.surface,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    sectionSubtitle: {
+      fontSize: 13,
+      color: theme.colors.text,
+      marginBottom: 18,
+    },
+    cardList: {
+      gap: 12,
+    },
+    emptyState: {
+      alignItems: "center",
+      paddingVertical: 24,
+      gap: 6,
+    },
+    emptyTitle: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: theme.colors.text,
+    },
+    emptySubtitle: {
+      fontSize: 12,
+      color: theme.colors.text,
+      textAlign: "center",
+    },
+    classCard: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 16,
+      backgroundColor: theme.colors.surface,
+      padding: 16,
+    },
+    classCardOngoing: {
+      borderColor: theme.colors.primary,
+      borderWidth: 1,
+      backgroundColor: theme.colors.surface,
+    },
+    classCardDone: {
+      borderColor: theme.colors.border,
+      borderWidth: 2,
+      backgroundColor: theme.colors.surface,
+    },
+    classCardPressed: {
+      backgroundColor: theme.colors.background,
+    },
+    classCardHeader: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+    classCardMeta: {
+      flex: 1,
+      marginRight: 8,
+    },
+    classCardTitle: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    classCardSubRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    classCardSubtitle: {
+      fontSize: 12,
+      color: theme.colors.text,
+      fontWeight: "500",
+    },
+    classCardMetaRight: {
+      alignItems: "flex-end",
+      gap: 10,
+    },
+    classCountBadge: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    classCountText: {
+      color: theme.colors.surface,
+      fontSize: 11,
+      fontWeight: "600",
+    },
+    classCardChevron: {
+      marginTop: 2,
+    },
+    classTimeRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginTop: 12,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    classTimeText: {
+      fontSize: 12,
+      color: theme.colors.text,
+    },
+  });
 
 export default ClassesScreen;

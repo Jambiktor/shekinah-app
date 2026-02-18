@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type Props = {
   title: string;
@@ -25,6 +26,7 @@ const AppHeader = ({
 }: Props) => {
   const [showAvailabilityMenu, setShowAvailabilityMenu] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const { theme } = useTheme();
   const availabilityOptions: Array<{
     value: "Available" | "Busy" | "Offline";
     label: string;
@@ -37,16 +39,22 @@ const AppHeader = ({
 
   return (
     <View
-      style={styles.header}
+      style={[
+        styles.header,
+        { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border },
+      ]}
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
     >
       {onMenuPress ? (
-        <Pressable onPress={onMenuPress} style={styles.menuButton}>
-          <Ionicons name="menu-outline" size={24} color="#6B7D8F" />
+        <Pressable
+          onPress={onMenuPress}
+          style={[styles.menuButton, { backgroundColor: theme.colors.background }]}
+        >
+          <Ionicons name="menu-outline" size={24} color={theme.colors.text} />
         </Pressable>
       ) : null}
       <View style={styles.brand}>
-        <Text style={styles.navTitle} numberOfLines={1}>
+        <Text style={[styles.navTitle, { color: theme.colors.text }]} numberOfLines={1}>
           {title}
         </Text>
       </View>
@@ -58,7 +66,7 @@ const AppHeader = ({
                 onPress={() => setShowAvailabilityMenu((prev) => !prev)}
                 style={styles.availabilityIconButton}
               >
-                <Ionicons name="person-circle" size={24} color="#1F6FEB" />
+                <Ionicons name="person-circle" size={24} color={theme.colors.primary} />
                 <View
                   style={[
                     styles.availabilityDot,
@@ -74,7 +82,7 @@ const AppHeader = ({
           ) : null}
           {showNotificationIcon ? (
             <Pressable onPress={onNotificationPress} style={styles.iconBadgeWrap}>
-              <Ionicons name="notifications" size={22} color="#1F6FEB" />
+              <Ionicons name="notifications" size={22} color={theme.colors.primary} />
               {notificationCount > 0 ? (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{notificationCount}</Text>

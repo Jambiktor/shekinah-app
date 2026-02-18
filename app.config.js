@@ -31,6 +31,10 @@ module.exports = () => {
         "EXPO_PUBLIC_SOCKET_IO_URL",
         expoConfig.extra?.EXPO_PUBLIC_SOCKET_IO_URL
       ),
+      EXPO_PUBLIC_SCHOOL_SLUG: readEnv(
+        "EXPO_PUBLIC_SCHOOL_SLUG",
+        expoConfig.extra?.EXPO_PUBLIC_SCHOOL_SLUG
+      ),
     },
   };
 };

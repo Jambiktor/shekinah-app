@@ -1,6 +1,7 @@
 import React from "react";
 import { Platform, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type Props = {
   title: string;
@@ -19,15 +20,24 @@ const AppHeader = ({
   notificationCount = 0,
   onNotificationPress,
 }: Props) => {
+  const { theme } = useTheme();
   return (
-    <View style={styles.header}>
-      <Pressable onPress={onMenuPress} style={styles.menuButton}>
-        <Ionicons name="menu-outline" size={24} color="#0F172A" />
+    <View
+      style={[
+        styles.header,
+        { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border },
+      ]}
+    >
+      <Pressable
+        onPress={onMenuPress}
+        style={[styles.menuButton, { backgroundColor: theme.colors.background }]}
+      >
+        <Ionicons name="menu-outline" size={24} color={theme.colors.text} />
       </Pressable>
-      <Text style={styles.navTitle}>{title}</Text>
+      <Text style={[styles.navTitle, { color: theme.colors.text }]}>{title}</Text>
       {showNotificationIcon ? (
         <Pressable onPress={onNotificationPress} style={styles.iconBadgeWrap}>
-          <Ionicons name="notifications" size={22} color="#1F6FEB" />
+          <Ionicons name="notifications" size={22} color={theme.colors.primary} />
           {notificationCount > 0 ? (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{notificationCount}</Text>

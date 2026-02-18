@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Shekinah",
+    "name": "Holy Nazarene",
     "slug": "shekinah-app",
-    "scheme": "shekinah-app",
+    "scheme": "holy-nazarene-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/holy-nazarene.jpeg",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/holy-nazarene.jpeg",
       "resizeMode": "contain",
-      "backgroundColor": "#F4F7FB"
+      "backgroundColor": "#fffaf3"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,7 +21,7 @@
     "android": {
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/holy-nazarene.jpeg",
         "backgroundColor": "#F4F7FB"
       },
       "package": "com.eunika.shekinahapp",
@@ -37,10 +37,11 @@
       "@react-native-community/datetimepicker"
     ],
     "extra": {
-      "EXPO_PUBLIC_API_BASE_URL": "",
-      "EXPO_PUBLIC_API_KEY": "",
-      "EXPO_PUBLIC_API_DEBUG": "",
-      "EXPO_PUBLIC_SOCKET_IO_URL": "",
+      "EXPO_PUBLIC_API_BASE_URL": "https://shekinahwebapp.eunika.xyz/admin/api",
+      "EXPO_PUBLIC_API_KEY": "79da86d3fec0bd1cf4f05e6815eec345fbcc797de298e10b6260d533c5fe7795",
+      "EXPO_PUBLIC_API_DEBUG": "true",
+      "EXPO_PUBLIC_SOCKET_IO_URL": "https://websocket-app.eunika.xyz/",
+      "EXPO_PUBLIC_SCHOOL_SLUG": "holy-nazarene",
       "eas": {
         "projectId": "00ff0bec-a683-45e5-9511-e51248cac79a"
       }

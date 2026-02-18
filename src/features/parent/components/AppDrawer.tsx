@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import { ScreenKey } from "../types";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type MenuItem = {
   key: ScreenKey;
@@ -65,6 +66,7 @@ const AppDrawer = ({
   const [isChildMenuOpen, setIsChildMenuOpen] = useState(false);
   const selectedChild =
     childOptions.find((child) => child.id === selectedChildId) ?? childOptions[0];
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!isOpen) {
@@ -94,18 +96,31 @@ const AppDrawer = ({
 
   return (
     <>
-      <Animated.View style={[styles.drawer, { transform: [{ translateX }] }]}>
-        <View style={styles.drawerHeader}>
-          <View style={styles.headerLogo}>
+      <Animated.View
+        style={[
+          styles.drawer,
+          {
+            backgroundColor: theme.colors.surface,
+            borderRightColor: theme.colors.border,
+            transform: [{ translateX }],
+          },
+        ]}
+      >
+        <View style={[styles.drawerHeader, { borderBottomColor: theme.colors.border }]}>
+          <View style={[styles.headerLogo, { backgroundColor: theme.colors.background }]}>
             <Image
-              source={require("../../../../assets/shekinah-logo.png")}
+              source={
+                theme.logo_url
+                  ? { uri: theme.logo_url }
+                  : require("../../../../assets/shekinah-logo.png")
+              }
               style={styles.headerLogoImage}
               resizeMode="contain"
             />
           </View>
           <View style={styles.headerText}>
-            <Text style={styles.headerName}>{profileName}</Text>
-            <Text style={styles.headerRole}>{profileRole}</Text>
+            <Text style={[styles.headerName, { color: theme.colors.text }]}>{profileName}</Text>
+            <Text style={[styles.headerRole, { color: theme.colors.text }]}>{profileRole}</Text>
             {/* <Text style={styles.headerId}>ID: {profileId}</Text> */}
           </View>
         </View>
@@ -162,15 +177,22 @@ const AppDrawer = ({
             <Pressable
               key={item.key}
               onPress={() => onSelect(item.key)}
-              style={[styles.drawerItem, isActive && styles.drawerItemActive]}
+              style={[
+                styles.drawerItem,
+                { backgroundColor: theme.colors.surface },
+                isActive && { backgroundColor: theme.colors.primary },
+                ]}
             >
               <Ionicons
                 name={item.icon}
                 size={18}
-                color={isActive ? "#FFFFFF" : "#334155"}
+                color={isActive ? theme.colors.surface : theme.colors.text}
               />
               <Text
-                style={[styles.drawerItemText, isActive && styles.drawerItemTextActive]}
+                style={[
+                  styles.drawerItemText,
+                  { color: isActive ? theme.colors.surface : theme.colors.text },
+                ]}
               >
                 {item.label}
               </Text>
@@ -197,9 +219,12 @@ const AppDrawer = ({
             style={styles.delayInput}
           />
         </View> */}
-        <Pressable style={styles.logoutButton} onPress={onLogout}>
-          <Ionicons name="log-out-outline" size={18} color="#DC2626" />
-          <Text style={styles.logoutText}>Logout</Text>
+        <Pressable
+          style={[styles.logoutButton, { borderColor: theme.colors.border }]}
+          onPress={onLogout}
+        >
+          <Ionicons name="log-out-outline" size={18} color={theme.colors.accent} />
+          <Text style={[styles.logoutText, { color: theme.colors.text }]}>Logout</Text>
         </Pressable>
       </Animated.View>
       <AnimatedPressable

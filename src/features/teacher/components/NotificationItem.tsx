@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { Notification } from "../types";
 import { stripHtml } from "../../../shared/helpers/text";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type Props = {
   email: Notification;
@@ -32,6 +33,7 @@ const formatTimeOnly = (datetime: string) => {
 };
 
 const NotificationItem = ({ email, isActive, onPress }: Props) => {
+  const { theme } = useTheme();
   const isUnread = email.readStatus === "unread";
   const isRead = !isUnread;
   const { messageText } = extractEmailPreview(email.emailMessage);
@@ -45,7 +47,7 @@ const NotificationItem = ({ email, isActive, onPress }: Props) => {
           <Ionicons
             name={email.readStatus === "read" ? "mail-open-outline" : "mail-unread-outline"}
             size={20}
-            color={isActive ? "#EAF6FF" : "#1F6FEB"}
+            color={isActive ? "#EAF6FF" : theme.colors.primary}
           />
         </View>
         <View style={styles.textWrap}>
@@ -70,7 +72,7 @@ const NotificationItem = ({ email, isActive, onPress }: Props) => {
             </Text>
           ) : null}
         </View>
-        {isUnread && <View style={styles.unreadDot} />}
+        {isUnread && <View style={[styles.unreadDot, { backgroundColor: theme.colors.primary }]} />}
       </View>
     </Pressable>
   );

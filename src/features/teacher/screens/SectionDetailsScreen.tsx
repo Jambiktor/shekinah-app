@@ -25,6 +25,7 @@ import {
   getStudentNotes,
   saveStudentNote,
 } from "../api/teacher/notes";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type Props = {
   selectedClass: string | null;
@@ -76,6 +77,7 @@ const SectionDetailsScreen = ({
   onBack,
   onStartAttendance,
 }: Props) => {
+  const { theme } = useTheme();
   const [selectedStudent, setSelectedStudent] = useState<TeacherStudent | null>(null);
   const [activeTab, setActiveTab] = useState<"attendance" | "details" | "notes">(
     "details"
@@ -514,8 +516,13 @@ const SectionDetailsScreen = ({
         <Ionicons name="albums-outline" size={36} color="#E8ECEF" />
         <Text style={styles.emptyTitle}>No class selected</Text>
         <Text style={styles.emptySubtitle}>Pick a class to view its section roster.</Text>
-        <Pressable style={styles.primaryButton} onPress={onBack}>
-          <Text style={styles.primaryButtonText}>Back to Classes</Text>
+        <Pressable
+          style={[styles.primaryButton, { backgroundColor: theme.colors.primary }]}
+          onPress={onBack}
+        >
+          <Text style={[styles.primaryButtonText, { color: theme.colors.surface }]}>
+            Back to Classes
+          </Text>
         </Pressable>
       </View>
     );
@@ -525,21 +532,31 @@ const SectionDetailsScreen = ({
     <View>
       <View style={styles.headerRow}>
         <Pressable style={styles.backButton} onPress={onBack}>
-          <Ionicons name="chevron-back" size={18} color="#1A73E8" />
-          <Text style={styles.backButtonText}>Classes</Text>
+          <Ionicons name="chevron-back" size={18} color={theme.colors.primary} />
+          <Text style={[styles.backButtonText, { color: theme.colors.text }]}>Classes</Text>
         </Pressable>
         <View style={styles.headerActions}>
-          <Pressable style={styles.primaryButton} onPress={onStartAttendance}>
-            <Text style={styles.primaryButtonText}>Take Attendance</Text>
+          <Pressable
+            style={[styles.primaryButton, { backgroundColor: theme.colors.primary }]}
+            onPress={onStartAttendance}
+          >
+            <Text style={[styles.primaryButtonText, { color: theme.colors.surface }]}>
+              Take Attendance
+            </Text>
           </Pressable>
           <Pressable
-            style={styles.toolsButton}
+            style={[styles.toolsButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
             onPress={() => setShowToolsMenu((prev) => !prev)}
           >
-            <Ionicons name="ellipsis-vertical" size={16} color="#1A2B3C" />
+            <Ionicons name="ellipsis-vertical" size={16} color={theme.colors.text} />
           </Pressable>
           {showToolsMenu ? (
-            <View style={styles.toolsMenu}>
+            <View
+              style={[
+                styles.toolsMenu,
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+              ]}
+            >
               {classRoster.length === 0 ? (
                 <View style={styles.toolsMenuItem}>
                   <Text style={styles.toolsMenuText}>No students in roster.</Text>
@@ -560,52 +577,66 @@ const SectionDetailsScreen = ({
         </View>
       </View>
 
-      <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>{classMeta.section || "Section"}</Text>
+      <View
+        style={[
+          styles.sectionCard,
+          { borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
+        ]}
+      >
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          {classMeta.section || "Section"}
+        </Text>
         {classMeta.subject ? (
           <View style={styles.metaRow}>
-            <Ionicons name="book-outline" size={14} color="#6B7D8F" />
-            <Text style={styles.metaText}>{classMeta.subject}</Text>
+            <Ionicons name="book-outline" size={14} color={theme.colors.text} />
+            <Text style={[styles.metaText, { color: theme.colors.text }]}>{classMeta.subject}</Text>
           </View>
         ) : null}
         {classMeta.time ? (
           <View style={styles.metaRow}>
-            <Ionicons name="time-outline" size={14} color="#6B7D8F" />
-            <Text style={styles.metaText}>{classMeta.time}</Text>
+            <Ionicons name="time-outline" size={14} color={theme.colors.text} />
+            <Text style={[styles.metaText, { color: theme.colors.text }]}>{classMeta.time}</Text>
           </View>
         ) : null}
-        <Text style={styles.countText}>{classRoster.length} students</Text>
+        <Text style={[styles.countText, { color: theme.colors.text }]}>
+          {classRoster.length} students
+        </Text>
       </View>
 
-      <Text style={styles.listTitle}>Student List</Text>
+      <Text style={[styles.listTitle, { color: theme.colors.text }]}>Student List</Text>
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
         {classRoster.map((student) => (
           <Pressable
             key={student.id}
             style={[
               styles.studentRow,
+              { borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
               student.gender?.toLowerCase() === "female"
-                ? styles.studentRowFemale
+                ? [styles.studentRowFemale, { borderColor: theme.colors.accent }]
                 : student.gender?.toLowerCase() === "male"
-                ? styles.studentRowMale
-                : null,
+                ? [styles.studentRowMale, { borderColor: theme.colors.secondary }]
+                : styles.studentRowNeutral,
             ]}
             onPress={() => setSelectedStudent(student)}
           >
-            <View style={styles.studentAvatar}>
+            <View style={[styles.studentAvatar, { backgroundColor: theme.colors.background }]}>
               {student.cardImage ? (
                 <Image
                   source={{ uri: student.cardImage }}
                   style={styles.studentAvatarImage}
                 />
               ) : (
-                <Ionicons name="person-outline" size={18} color="#6B7D8F" />
+                <Ionicons name="person-outline" size={18} color={theme.colors.text} />
               )}
             </View>
             <View style={styles.studentMeta}>
-              <Text style={styles.studentName}>{student.fullName}</Text>
+              <Text style={[styles.studentName, { color: theme.colors.text }]}>
+                {student.fullName}
+              </Text>
               {student.cardNumber ? (
-                <Text style={styles.studentSub}>Card: {student.cardNumber}</Text>
+                <Text style={[styles.studentSub, { color: theme.colors.text }]}>
+                  Card: {student.cardNumber}
+                </Text>
               ) : null}
             </View>
           </Pressable>
@@ -999,21 +1030,19 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 6,
   },
-  backButtonText: {
+ backButtonText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#1A73E8",
   },
   primaryButton: {
     paddingHorizontal: 14,
     height: 34,
     borderRadius: 12,
-    backgroundColor: "#2C77BC",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
   },
   primaryButtonText: {
-    color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "700",
   },
@@ -1021,9 +1050,9 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 12,
-    backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
   },
   toolsMenu: {
     position: "absolute",
@@ -1073,18 +1102,15 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: "#6B7D8F",
   },
   countText: {
     marginTop: 8,
     fontSize: 12,
     fontWeight: "600",
-    color: "#1A2B3C",
   },
   listTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#1A2B3C",
     marginBottom: 10,
   },
   list: {
@@ -1127,11 +1153,9 @@ const styles = StyleSheet.create({
   studentName: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#1A2B3C",
   },
   studentSub: {
     fontSize: 11,
-    color: "#6B7D8F",
     marginTop: 4,
   },
   emptyState: {
@@ -1636,4 +1660,3 @@ const styles = StyleSheet.create({
 });
 
 export default SectionDetailsScreen;
-

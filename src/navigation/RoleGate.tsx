@@ -12,6 +12,7 @@ import DeveloperStack from "./DeveloperStack";
 import { AuthProfile } from "../types/auth";
 import { ParentProfile } from "../features/parent/types";
 import { TeacherLevel, TeacherProfile } from "../features/teacher/types";
+import { useTheme } from "../shared/theme/ThemeProvider";
 
 const normalizeRole = (role: string | null | undefined) => {
   return String(role || "").trim().toLowerCase();
@@ -28,6 +29,8 @@ const RoleGate = () => {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [isSessionRestoring, setIsSessionRestoring] = useState(true);
   const [loginEventId, setLoginEventId] = useState(0);
+  const { theme, refreshTheme, isLoading: isThemeLoading } = useTheme();
+  const role = useMemo(() => normalizeRole(profile?.role), [profile?.role]);
 
   useEffect(() => {
     let isMounted = true;
@@ -53,6 +56,12 @@ const RoleGate = () => {
       isMounted = false;
     };
   }, []);
+
+  // Refresh theme when role (module) changes.
+  useEffect(() => {
+    const moduleForRole = role === "parent" ? "app" : role === "teacher" ? "admin" : undefined;
+    refreshTheme({ module: moduleForRole, app: moduleForRole }).catch(() => {});
+  }, [role, refreshTheme]);
 
   const handleLogin = async (login: string, password: string) => {
     setIsAuthLoading(true);
@@ -81,7 +90,7 @@ const RoleGate = () => {
     setLoginEventId(0);
   };
 
-  const role = useMemo(() => normalizeRole(profile?.role), [profile?.role]);
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   if (!profile) {
     if (isSessionRestoring) {
@@ -91,11 +100,15 @@ const RoleGate = () => {
           <View style={styles.backgroundGlowBottom} />
           <View style={styles.loadingContainer}>
             <Image
-              source={require("../../assets/shekinah-logo.png")}
+              source={
+                theme.logo_url
+                  ? { uri: theme.logo_url }
+                  : require("../../assets/shekinah-logo.png")
+              }
               style={styles.loadingLogo}
               resizeMode="contain"
             />
-            <ActivityIndicator size="large" color="#1F6FE8" />
+            <ActivityIndicator size="large" color={theme.colors.primary} />
           </View>
         </SafeAreaView>
       );
@@ -105,7 +118,13 @@ const RoleGate = () => {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.backgroundGlowTop} />
         <View style={styles.backgroundGlowBottom} />
-        <LoginScreen onLogin={handleLogin} isLoading={isAuthLoading} error={authError} />
+        <LoginScreen
+          onLogin={handleLogin}
+          isLoading={isAuthLoading}
+          error={authError}
+          theme={theme}
+          isThemeLoading={isThemeLoading}
+        />
       </SafeAreaView>
     );
   }
@@ -143,44 +162,47 @@ const RoleGate = () => {
         onLogin={handleLogin}
         isLoading={isAuthLoading}
         error={authError ?? "Unsupported account role."}
+        theme={theme}
+        isThemeLoading={isThemeLoading}
       />
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F4F7FB",
-  },
-  backgroundGlowTop: {
-    position: "absolute",
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: "rgba(31, 176, 242, 0.18)",
-    top: -120,
-    right: -90,
-  },
-  backgroundGlowBottom: {
-    position: "absolute",
-    width: 380,
-    height: 380,
-    borderRadius: 190,
-    backgroundColor: "rgba(26, 115, 232, 0.12)",
-    bottom: -160,
-    left: -120,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loadingLogo: {
-    width: 80,
-    height: 80,
-    marginBottom: 16,
-  },
-});
+const createStyles = (theme: import("../shared/theme/types").SchoolTheme) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    backgroundGlowTop: {
+      position: "absolute",
+      width: 320,
+      height: 320,
+      borderRadius: 160,
+      backgroundColor: `${theme.colors.primary}33`,
+      top: -120,
+      right: -90,
+    },
+    backgroundGlowBottom: {
+      position: "absolute",
+      width: 380,
+      height: 380,
+      borderRadius: 190,
+      backgroundColor: `${theme.colors.secondary}26`,
+      bottom: -160,
+      left: -120,
+    },
+    loadingContainer: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    loadingLogo: {
+      width: 80,
+      height: 80,
+      marginBottom: 16,
+    },
+  });
 
 export default RoleGate;
