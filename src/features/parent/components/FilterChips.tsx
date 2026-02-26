@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type Option = {
   id: string;
@@ -13,6 +14,9 @@ type Props = {
 };
 
 const FilterChips = ({ options, selectedId, onSelect }: Props) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <View style={styles.container}>
       {options.map((option) => {
@@ -33,29 +37,32 @@ const FilterChips = ({ options, selectedId, onSelect }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    backgroundColor: "#E2E8F0",
-  },
-  chipActive: {
-    backgroundColor: "#1A73E8",
-  },
-  chipText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#334155",
-  },
-  chipTextActive: {
-    color: "#FFFFFF",
-  },
-});
+const createStyles = (theme: import("../../../shared/theme/types").SchoolTheme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    chip: {
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 14,
+      backgroundColor: `${theme.colors.primary}1A`,
+      borderWidth: 1,
+      borderColor: `${theme.colors.primary}33`,
+    },
+    chipActive: {
+      backgroundColor: theme.colors.primary,
+    },
+    chipText: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: theme.colors.text,
+    },
+    chipTextActive: {
+      color: theme.colors.surface,
+    },
+  });
 
 export default FilterChips;

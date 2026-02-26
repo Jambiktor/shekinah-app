@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Image, StatusBar, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import LoginScreen from "../shared/ui/LoginScreen";
@@ -29,8 +29,10 @@ const RoleGate = () => {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [isSessionRestoring, setIsSessionRestoring] = useState(true);
   const [loginEventId, setLoginEventId] = useState(0);
+  const [isSplashImageLoaded, setSplashImageLoaded] = useState(false);
   const { theme, refreshTheme, isLoading: isThemeLoading } = useTheme();
   const role = useMemo(() => normalizeRole(profile?.role), [profile?.role]);
+  const shouldShowSplash = !profile && (isSessionRestoring || isThemeLoading || !isSplashImageLoaded);
 
   useEffect(() => {
     let isMounted = true;
@@ -59,6 +61,9 @@ const RoleGate = () => {
 
   // Refresh theme when role (module) changes.
   useEffect(() => {
+    if (!role) {
+      return;
+    }
     const moduleForRole = role === "parent" ? "app" : role === "teacher" ? "admin" : undefined;
     refreshTheme({ module: moduleForRole, app: moduleForRole }).catch(() => {});
   }, [role, refreshTheme]);
@@ -92,30 +97,34 @@ const RoleGate = () => {
 
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
-  if (!profile) {
-    if (isSessionRestoring) {
-      return (
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.backgroundGlowTop} />
-          <View style={styles.backgroundGlowBottom} />
-          <View style={styles.loadingContainer}>
-            <Image
-              source={
-                theme.logo_url
-                  ? { uri: theme.logo_url }
-                  : require("../../assets/shekinah-logo.png")
-              }
-              style={styles.loadingLogo}
-              resizeMode="contain"
-            />
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        </SafeAreaView>
-      );
-    }
-
+  if (shouldShowSplash) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
+        <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+        <View style={styles.backgroundGlowTop} />
+        <View style={styles.backgroundGlowBottom} />
+        <View style={styles.loadingContainer}>
+          <Image
+            source={
+              theme.logo_url
+                ? { uri: theme.logo_url }
+                : require("../../assets/holy-nazarene.jpeg")
+            }
+            style={styles.loadingLogo}
+            resizeMode="contain"
+            onLoad={() => setSplashImageLoaded(true)}
+            onError={() => setSplashImageLoaded(true)}
+          />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={["left", "right"]}>
+        <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
         <View style={styles.backgroundGlowTop} />
         <View style={styles.backgroundGlowBottom} />
         <LoginScreen
@@ -173,7 +182,7 @@ const createStyles = (theme: import("../shared/theme/types").SchoolTheme) =>
   StyleSheet.create({
     safeArea: {
       flex: 1,
-      backgroundColor: theme.colors.background,
+      backgroundColor: "transparent",
     },
     backgroundGlowTop: {
       position: "absolute",

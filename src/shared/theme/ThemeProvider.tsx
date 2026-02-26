@@ -26,10 +26,11 @@ const ThemeContext = createContext<ThemeContextValue>({
 
 type Props = {
   children: React.ReactNode;
+  initialTheme?: SchoolTheme;
 };
 
-const ThemeProvider = ({ children }: Props) => {
-  const [theme, setTheme] = useState<SchoolTheme>(getDefaultTheme());
+const ThemeProvider = ({ children, initialTheme }: Props) => {
+  const [theme, setTheme] = useState<SchoolTheme>(initialTheme ?? getDefaultTheme());
   const [isLoading, setIsLoading] = useState(false);
   const defaultSchool = getEnvString("EXPO_PUBLIC_SCHOOL_SLUG") || undefined;
   const lastFetchKeyRef = useRef<string | null>(null);
@@ -80,9 +81,11 @@ const ThemeProvider = ({ children }: Props) => {
   );
 
   useEffect(() => {
+    if (initialTheme) {
+      return;
+    }
     refreshTheme().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialTheme, refreshTheme]);
 
   const value = useMemo(
     () => ({

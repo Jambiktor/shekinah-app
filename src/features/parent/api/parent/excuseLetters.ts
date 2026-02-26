@@ -40,8 +40,8 @@ export type ParentMessageHistoryResponse = {
 type SubmitExcuseLetterPayload = {
   childId: string;
   teacherIds: string[];
-  dateFrom: string;
-  dateTo: string;
+  dateFrom?: string | null;
+  dateTo?: string | null;
   reason: string;
   customReason?: string;
   message: string;
@@ -55,8 +55,8 @@ export const submitExcuseLetter = async (
     body: JSON.stringify({
       child_id: payload.childId,
       teacher_ids: payload.teacherIds,
-      date_from: payload.dateFrom,
-      date_to: payload.dateTo,
+      date_from: payload.dateFrom ?? "",
+      date_to: payload.dateTo ?? "",
       reason: payload.reason,
       custom_reason: payload.customReason || "",
       message: payload.message,
@@ -65,11 +65,14 @@ export const submitExcuseLetter = async (
 };
 
 export const fetchParentMessageHistory = async (
-  options?: { childId?: string; page?: number; perPage?: number }
+  options?: { childId?: string; type?: "excuse_letter" | "message" | "all"; page?: number; perPage?: number }
 ): Promise<ParentMessageHistoryResponse> => {
   const params = new URLSearchParams();
   if (options?.childId && options.childId !== "all") {
     params.set("child_id", options.childId);
+  }
+  if (options?.type && options.type !== "all") {
+    params.set("type", options.type);
   }
   if (options?.page) {
     params.set("page", String(options.page));

@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import Card from "../components/Card";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type Props = {
   emailNotifications: boolean;
@@ -29,6 +30,8 @@ const SettingsScreen = ({
   onToggleEmailNotifications,
   onUpdatePassword,
 }: Props) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -107,7 +110,7 @@ const SettingsScreen = ({
         <Card style={styles.preferenceCard}>
           <View style={styles.preferenceHeader}>
             <View style={styles.preferenceIcon}>
-              <Ionicons name="mail-outline" size={20} color="#1A73E8" />
+              <Ionicons name="mail-outline" size={20} color={theme.colors.primary} />
             </View>
             <View style={styles.preferenceText}>
               <Text style={styles.preferenceTitle}>Email notifications</Text>
@@ -118,8 +121,8 @@ const SettingsScreen = ({
             <Switch
               value={emailNotifications}
               onValueChange={onToggleEmailNotifications}
-              trackColor={{ false: "#CBD5E1", true: "#77C6F8" }}
-              thumbColor={emailNotifications ? "#1A73E8" : "#F1F5F9"}
+              trackColor={{ false: theme.colors.border, true: `${theme.colors.primary}66` }}
+              thumbColor={emailNotifications ? theme.colors.primary : theme.colors.surface}
             />
           </View>
         </Card>
@@ -132,7 +135,7 @@ const SettingsScreen = ({
           <View style={styles.inputRow}>
             <TextInput
               placeholder="Enter current password"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={`${theme.colors.text}99`}
               value={currentPassword}
               onChangeText={setCurrentPassword}
               secureTextEntry={!showCurrentPassword}
@@ -145,7 +148,7 @@ const SettingsScreen = ({
               <Ionicons
                 name={showCurrentPassword ? "eye-off-outline" : "eye-outline"}
                 size={18}
-                color="#64748B"
+                color={theme.colors.text}
               />
             </Pressable>
           </View>
@@ -154,7 +157,7 @@ const SettingsScreen = ({
           <View style={styles.inputRow}>
             <TextInput
               placeholder="Enter new password"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={`${theme.colors.text}99`}
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry={!showNewPassword}
@@ -167,7 +170,7 @@ const SettingsScreen = ({
               <Ionicons
                 name={showNewPassword ? "eye-off-outline" : "eye-outline"}
                 size={18}
-                color="#64748B"
+                color={theme.colors.text}
               />
             </Pressable>
           </View>
@@ -177,7 +180,7 @@ const SettingsScreen = ({
           <View style={styles.inputRow}>
             <TextInput
               placeholder="Confirm new password"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={`${theme.colors.text}99`}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showConfirmPassword}
@@ -190,7 +193,7 @@ const SettingsScreen = ({
               <Ionicons
                 name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
                 size={18}
-                color="#64748B"
+                color={theme.colors.text}
               />
             </Pressable>
           </View>
@@ -200,7 +203,7 @@ const SettingsScreen = ({
             onPress={handleUpdatePassword}
             disabled={!canSubmit}
           >
-            <Ionicons name="lock-closed-outline" size={16} color="#FFFFFF" />
+            <Ionicons name="lock-closed-outline" size={16} color={theme.colors.surface} />
             <Text style={styles.updateButtonText}>
               {isUpdating ? "Updating..." : "Update Password"}
             </Text>
@@ -224,126 +227,137 @@ const SettingsScreen = ({
   );
 };
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 32,
-    gap: 20,
-  },
-  pageTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  section: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  sectionBody: {
-    fontSize: 13,
-    color: "#64748B",
-  },
-  preferenceCard: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 16,
-    padding: 12,
-    shadowColor: "#0f172a6e",
-    shadowOpacity: 0,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 6,
-  },
-  passwordCard: {
-    gap: 12,
-  },
-  preferenceHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  preferenceIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: "#E8F3FF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  preferenceText: {
-    flex: 1,
-    gap: 4,
-  },
-  preferenceTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  preferenceBody: {
-    fontSize: 12,
-    color: "#64748B",
-    lineHeight: 18,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#0F172A",
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: "#FFFFFF",
-  },
-  input: {
-    flex: 1,
-    color: "#0F172A",
-    paddingVertical: 6,
-  },
-  inputIcon: {
-    paddingLeft: 8,
-    paddingVertical: 4,
-  },
-  helperText: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: -6,
-  },
-  updateButton: {
-    marginTop: 8,
-    backgroundColor: "#3B8DBD",
-    borderRadius: 12,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  updateButtonDisabled: {
-    backgroundColor: "#9DBFD3",
-  },
-  updateButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  statusText: {
-    fontSize: 12,
-    color: "#B91C1C",
-  },
-  statusSuccess: {
-    color: "#15803D",
-  },
-});
+const createStyles = (theme: import("../../../shared/theme/types").SchoolTheme) => {
+  const colors = theme.colors;
+  return StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingTop: 24,
+      paddingBottom: 32,
+      gap: 20,
+    },
+    pageTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    section: {
+      gap: 12,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    sectionBody: {
+      fontSize: 13,
+      color: `${colors.text}99`,
+    },
+    preferenceCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 12,
+      shadowColor: colors.text,
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 0 },
+      elevation: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    passwordCard: {
+      gap: 12,
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    preferenceHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    preferenceIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: `${colors.primary}14`,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    preferenceText: {
+      flex: 1,
+      gap: 4,
+    },
+    preferenceTitle: {
+      fontSize: 14,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    preferenceBody: {
+      fontSize: 12,
+      color: `${colors.text}99`,
+      lineHeight: 18,
+    },
+    label: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    inputRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      backgroundColor: colors.surface,
+    },
+    input: {
+      flex: 1,
+      color: colors.text,
+      paddingVertical: 6,
+    },
+    inputIcon: {
+      paddingLeft: 8,
+      paddingVertical: 4,
+    },
+    helperText: {
+      fontSize: 12,
+      color: `${colors.text}99`,
+      marginTop: -6,
+    },
+    updateButton: {
+      marginTop: 8,
+      backgroundColor: colors.primary,
+      borderRadius: 12,
+      paddingVertical: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+    updateButtonDisabled: {
+      backgroundColor: colors.border,
+    },
+    updateButtonText: {
+      color: colors.surface,
+      fontWeight: "700",
+    },
+    statusText: {
+      fontSize: 12,
+      color: colors.accent,
+    },
+    statusSuccess: {
+      color: colors.primary,
+    },
+  });
+};
 
 export default SettingsScreen;

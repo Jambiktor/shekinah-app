@@ -4,7 +4,15 @@
     "slug": "shekinah-app",
     "scheme": "holy-nazarene-app",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/00ff0bec-a683-45e5-9511-e51248cac79a",
+      "checkAutomatically": "ON_ERROR_RECOVERY",
+      "fallbackToCacheTimeout": 0
+    },
+    "orientation": "default",
     "icon": "./assets/holy-nazarene.jpeg",
     "userInterfaceStyle": "light",
     "splash": {
@@ -41,6 +49,9 @@
       "EXPO_PUBLIC_API_KEY": "79da86d3fec0bd1cf4f05e6815eec345fbcc797de298e10b6260d533c5fe7795",
       "EXPO_PUBLIC_API_DEBUG": "true",
       "EXPO_PUBLIC_SOCKET_IO_URL": "https://websocket-app.eunika.xyz/",
+      "EXPO_PUBLIC_KIOSK_ID": "KIOSK-001",
+      "EXPO_PUBLIC_KIOSK_API_KEY": "kiosk-sync-test-key",
+      "EXPO_PUBLIC_KIOSK_EVENTS_PATH": "/kiosk/sync/events/payloads",
       "EXPO_PUBLIC_SCHOOL_SLUG": "holy-nazarene",
       "eas": {
         "projectId": "00ff0bec-a683-45e5-9511-e51248cac79a"

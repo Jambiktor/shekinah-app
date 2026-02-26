@@ -40,14 +40,27 @@ const NotificationItem = ({ email, isActive, onPress }: Props) => {
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.container, isActive && styles.containerActive, isUnread && styles.unread]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: isActive ? theme.colors.primary : theme.colors.surface,
+          borderColor: isActive ? theme.colors.primary : theme.colors.border,
+        },
+        isUnread && { borderColor: isActive ? theme.colors.primary : `${theme.colors.primary}55` },
+      ]}
     >
       <View style={styles.row}>
-        <View style={[styles.iconWrap, isActive && styles.iconWrapActive]}>
+        <View
+          style={[
+            styles.iconWrap,
+            { backgroundColor: `${theme.colors.primary}14` },
+            isActive && { backgroundColor: "rgba(255,255,255,0.2)" },
+          ]}
+        >
           <Ionicons
             name={email.readStatus === "read" ? "mail-open-outline" : "mail-unread-outline"}
             size={20}
-            color={isActive ? "#EAF6FF" : theme.colors.primary}
+            color={isActive ? theme.colors.surface : theme.colors.primary}
           />
         </View>
         <View style={styles.textWrap}>
@@ -57,14 +70,21 @@ const NotificationItem = ({ email, isActive, onPress }: Props) => {
                 styles.subject,
                 isUnread && styles.subjectUnread,
                 isRead && !isActive && styles.subjectRead,
-                isActive && styles.subjectActive,
+                isActive && { color: theme.colors.surface },
               ]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
               {email.subject}
             </Text>
-            <Text style={[styles.time, isActive && styles.timeActive]} numberOfLines={1}>
+            <Text
+              style={[
+                styles.time,
+                { color: isActive ? theme.colors.surface : theme.colors.text },
+                isUnread && { color: theme.colors.primary },
+              ]}
+              numberOfLines={1}
+            >
               {formatTimeOnly(email.datetimeSend)}
             </Text>
           </View>
@@ -74,7 +94,7 @@ const NotificationItem = ({ email, isActive, onPress }: Props) => {
                 styles.preview,
                 isUnread && styles.previewUnread,
                 isRead && !isActive && styles.previewRead,
-                isActive && styles.previewActive,
+                isActive && { color: theme.colors.surface },
               ]}
               numberOfLines={1}
             >
@@ -103,13 +123,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     position: "relative",
   },
-  containerActive: {
-    backgroundColor: "#3A8FB7",
-    borderColor: "#3A8FB7",
-  },
-  unread: {
-    borderColor: "#B6E3FF",
-  },
+  containerActive: {},
+  unread: {},
   row: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -123,9 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#E7F0FF",
   },
-  iconWrapActive: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-  },
+  iconWrapActive: {},
   textWrap: {
     flex: 1,
   },
@@ -149,9 +162,7 @@ const styles = StyleSheet.create({
   subjectRead: {
     color: "#64748B",
   },
-  subjectActive: {
-    color: "#FFFFFF",
-  },
+  subjectActive: {},
   preview: {
     fontSize: 13,
     color: "#334155",
@@ -164,18 +175,14 @@ const styles = StyleSheet.create({
   previewRead: {
     color: "#94A3B8",
   },
-  previewActive: {
-    color: "#E6F5FF",
-  },
+  previewActive: {},
   time: {
     flexShrink: 0,
     fontSize: 12,
     color: "#94A3B8",
     fontWeight: "600",
   },
-  timeActive: {
-    color: "#E6F5FF",
-  },
+  timeActive: {},
   unreadDot: {
     width: 8,
     height: 8,

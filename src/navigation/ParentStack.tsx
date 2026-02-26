@@ -10,9 +10,11 @@ import AppDrawer from "../features/parent/components/AppDrawer";
 import DashboardScreen from "../features/parent/screens/DashboardScreen";
 import InboxScreen from "../features/parent/screens/InboxScreen";
 import LogsScreen from "../features/parent/screens/LogsScreen";
+import PurchasesScreen from "../features/parent/screens/PurchasesScreen";
 import MessageScreen from "../features/parent/screens/MessageScreen";
 import SettingsScreen from "../features/parent/screens/SettingsScreen";
 import DirectMessageScreen from "../features/parent/screens/DirectMessageScreen";
+import LedgerScreen from "../features/parent/screens/LedgerScreen";
 import { fetchParentDashboard } from "../features/parent/api/parent/dashboard";
 import { updatePassword } from "../features/parent/api/parent/account";
 import {
@@ -30,11 +32,14 @@ import {
   saveEmailNotificationPreference,
 } from "../features/parent/storage/preferences";
 import { getEnvString } from "../shared/config/env";
+import { useTheme } from "../shared/theme/ThemeProvider";
 
 const MENU_ITEMS = [
   { key: "dashboard" as const, label: "Dashboard", icon: "home-outline" },
   { key: "inbox" as const, label: "Inbox", icon: "mail-outline" },
   { key: "logs" as const, label: "View Attendance", icon: "clipboard-outline" },
+  { key: "purchases" as const, label: "Purchases", icon: "cart-outline" },
+  { key: "ledger" as const, label: "My Balance", icon: "wallet-outline" },
   { key: "excuse-letter" as const, label: "Talk to Teacher", icon: "chatbubble-ellipses-outline" },
   { key: "settings" as const, label: "Settings", icon: "settings-outline" },
 ];
@@ -87,11 +92,14 @@ type Props = {
 };
 
 const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
+  const { theme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeScreen, setActiveScreen] = useState<ScreenKey>("dashboard");
   const parentProfile = profile;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [purchaseLogs, setPurchaseLogs] = useState<LogEntry[]>([]);
+  const [ledgerChildId, setLedgerChildId] = useState<string | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [reportStats, setReportStats] = useState<ReportStats>(createEmptyReportStats());
   const [activeEmailId, setActiveEmailId] = useState<string | null>(null);
@@ -113,6 +121,20 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
   const presenceSocketRef = useRef<Socket | null>(null);
   const socketUrl = getEnvString("EXPO_PUBLIC_SOCKET_IO_URL");
   const screenAnim = useRef(new Animated.Value(1)).current;
+  const toggleMenu = React.useCallback(() => setMenuOpen((prev) => !prev), []);
+  const closeMenu = React.useCallback(() => setMenuOpen(false), []);
+  const openScreen = React.useCallback(
+    (screen: ScreenKey) => {
+      setActiveScreen(screen);
+      setMenuOpen(false);
+    },
+    []
+  );
+  const goToInbox = React.useCallback(() => {
+    setActiveEmailId(null);
+    setActiveScreen("inbox");
+  }, []);
+  const backToInbox = React.useCallback(() => openScreen("inbox"), [openScreen]);
 
   const activeEmail = useMemo(
     () => notifications.find((email) => email.id === activeEmailId) ?? null,
@@ -126,24 +148,79 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
     }
 
     const fallbackOptions = Array.from(
-      new Map(logs.map((log) => [log.childId, log.childName])).entries()
+      new Map([...logs, ...purchaseLogs].map((log) => [log.childId, log.childName])).entries()
     ).map(([id, label]) => ({ id, label }));
 
     return [{ id: "all", label: "All Children" }, ...fallbackOptions];
-  }, [children, logs]);
+  }, [children, logs, purchaseLogs]);
 
   const selectedChildName =
     childOptions.find((child) => child.id === selectedChildId)?.label ??
     (children[0]?.name ?? "Your Child");
 
-  const filteredLogs = useMemo(() => {
-    if (selectedChildId === "all") {
-      return logs;
+  useEffect(() => {
+    if (activeScreen === "ledger") {
+      const firstChild = children[0]?.id ?? null;
+      if (ledgerChildId === null) {
+        setLedgerChildId(firstChild);
+      } else {
+        const exists = children.some((child) => child.id === ledgerChildId);
+        if (!exists) {
+          setLedgerChildId(firstChild);
+        }
+      }
     }
-    return logs.filter((log) => log.childId === selectedChildId);
+  }, [activeScreen, children, ledgerChildId]);
+
+  const filteredLogs = useMemo(() => {
+    const sortedLogs = [...logs].sort((a, b) => {
+      const aTime = new Date(a.dateLogged).getTime();
+      const bTime = new Date(b.dateLogged).getTime();
+      if (!Number.isNaN(aTime) && !Number.isNaN(bTime)) {
+        return bTime - aTime;
+      }
+      if (!Number.isNaN(aTime)) {
+        return -1;
+      }
+      if (!Number.isNaN(bTime)) {
+        return 1;
+      }
+      return b.dateLogged.localeCompare(a.dateLogged);
+    });
+    if (selectedChildId === "all") {
+      return sortedLogs;
+    }
+    return sortedLogs.filter((log) => log.childId === selectedChildId);
   }, [selectedChildId, logs]);
 
-  const appTitle = "Shekinah Learning School";
+  const filteredPurchaseLogs = useMemo(() => {
+    const sortedLogs = [...purchaseLogs].sort((a, b) => {
+      const aTime = new Date(a.dateLogged).getTime();
+      const bTime = new Date(b.dateLogged).getTime();
+      if (!Number.isNaN(aTime) && !Number.isNaN(bTime)) {
+        return bTime - aTime;
+      }
+      if (!Number.isNaN(aTime)) {
+        return -1;
+      }
+      if (!Number.isNaN(bTime)) {
+        return 1;
+      }
+      return b.dateLogged.localeCompare(a.dateLogged);
+    });
+    if (selectedChildId === "all") {
+      return sortedLogs;
+    }
+    return sortedLogs.filter((log) => log.childId === selectedChildId);
+  }, [selectedChildId, purchaseLogs]);
+
+  const appTitle = useMemo(() => {
+    const envTitle = getEnvString("EXPO_PUBLIC_APP_TITLE");
+    if (envTitle) return envTitle;
+    if (theme?.short_name) return theme.short_name;
+    if (theme?.name) return theme.name;
+    return "Shekinah Learning School";
+  }, [theme]);
 
   const isUnauthorizedError = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
@@ -176,11 +253,6 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
     }).start();
   }, [activeScreen, screenAnim]);
 
-  const openScreen = (screen: ScreenKey) => {
-    setActiveScreen(screen);
-    setMenuOpen(false);
-  };
-
   const handleOpenDirectMessage = (childIds: string[], teacherIds: string[]) => {
     if (childIds.length > 0) {
       setSelectedChildId(childIds[0]);
@@ -189,13 +261,14 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
     setActiveScreen("excuse-letter");
   };
 
-  const handleLogout = () => {
+  const handleLogout = React.useCallback(() => {
     console.log("handleLogout", { scope: "parent" });
     setMenuOpen(false);
     setActiveScreen("dashboard");
     setActiveEmailId(null);
     setNotifications([]);
     setLogs([]);
+    setPurchaseLogs([]);
     setChildren([]);
     setReportStats(createEmptyReportStats());
     setPendingEmailId(null);
@@ -206,7 +279,7 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
     Notifications.cancelAllScheduledNotificationsAsync().catch(() => undefined);
     void clearEmailNotificationPreference();
     onLogout();
-  };
+  }, [onLogout]);
 
   const handleSelectEmail = async (emailId: string) => {
     setActiveEmailId(emailId);
@@ -257,15 +330,34 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
     setEmailNotifications(value);
     try {
       const response = await updateEmailNotifications(value);
-      if (!response.success) {
+      const looksLikeToggleMessage =
+        typeof response.message === "string" &&
+        /Email notifications have been turned (on|off)\./i.test(response.message);
+
+      // API sometimes omits the boolean or sends success=false even when the action succeeded.
+      const isSuccess = response.success !== false || looksLikeToggleMessage;
+      if (!isSuccess) {
         throw new Error(response.message || "Unable to update email preferences.");
       }
+      // Re-fetch from API to mirror the server's saved value and avoid flip-flop UX.
+      const refreshed = await fetchEmailNotificationsPreference();
+      const serverEnabled =
+        refreshed?.enabled !== undefined ? refreshed.enabled : value;
+      setEmailNotifications(serverEnabled);
       if (parentProfile) {
-        await saveEmailNotificationPreference(parentProfile.id, value);
+        await saveEmailNotificationPreference(parentProfile.id, serverEnabled);
       }
     } catch (error) {
       console.warn("updateEmailNotifications failed", error);
-      setEmailNotifications(previousValue);
+      const msg = error instanceof Error ? error.message : "";
+      const looksLikeToggleMessage = /Email notifications have been turned (on|off)\./i.test(msg);
+
+      // If backend said it turned on/off, keep the user's requested value rather than reverting.
+      if (!looksLikeToggleMessage) {
+        setEmailNotifications(previousValue);
+      } else if (parentProfile) {
+        void saveEmailNotificationPreference(parentProfile.id, emailNotifications);
+      }
     }
   };
 
@@ -383,6 +475,7 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
       const response = await fetchParentDashboard();
       setNotifications(response.notifications);
       setLogs(response.logs);
+      setPurchaseLogs(response.purchaseLogs);
       setChildren(response.children);
       setReportStats(response.reports);
       if (!options?.keepSelection) {
@@ -399,6 +492,7 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
       const fallback = createEmptyReportStats();
       setNotifications([]);
       setLogs([]);
+      setPurchaseLogs([]);
       setChildren([]);
       setReportStats(fallback);
       if (!options?.keepSelection) {
@@ -538,15 +632,12 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
 
       <AppHeader
         title={appTitle}
-        onMenuPress={() => setMenuOpen((prev) => !prev)}
+        onMenuPress={toggleMenu}
         showNotificationIcon
         notificationCount={
           notifications.filter((email) => email.readStatus === "unread").length
         }
-        onNotificationPress={() => {
-          setActiveEmailId(null);
-          setActiveScreen("inbox");
-        }}
+        onNotificationPress={goToInbox}
       />
 
       <AppDrawer
@@ -554,7 +645,7 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
         menuItems={MENU_ITEMS}
         activeKey={activeScreen}
         onSelect={openScreen}
-        onClose={() => setMenuOpen(false)}
+        onClose={closeMenu}
         onLogout={handleLogout}
         onSimulateNotification={handleSimulateNotification}
         onShowPushToken={handleShowPushToken}
@@ -619,7 +710,7 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
         )}
 
         {activeScreen === "message" && (
-          <MessageScreen email={activeEmail} onBack={() => openScreen("inbox")} />
+          <MessageScreen email={activeEmail} onBack={backToInbox} />
         )}
 
         {activeScreen === "logs" && (
@@ -629,6 +720,24 @@ const ParentStack = ({ profile, loginEventId, onLogout }: Props) => {
             selectedChildId={selectedChildId}
             onSelectChild={setSelectedChildId}
             isLoading={isDashboardLoading}
+          />
+        )}
+
+        {activeScreen === "purchases" && (
+          <PurchasesScreen
+            logs={filteredPurchaseLogs}
+            childOptions={childOptions}
+            selectedChildId={selectedChildId}
+            onSelectChild={setSelectedChildId}
+            isLoading={isDashboardLoading}
+          />
+        )}
+
+        {activeScreen === "ledger" && (
+          <LedgerScreen
+            selectedChildId={ledgerChildId}
+            onSelectChild={setLedgerChildId}
+            childOptions={childOptions.filter((child) => child.id !== "all")}
           />
         )}
 
@@ -666,7 +775,7 @@ const styles = StyleSheet.create({
     width: 320,
     height: 320,
     borderRadius: 160,
-    backgroundColor: "rgba(31, 176, 242, 0.18)",
+    backgroundColor: "rgba(209, 214, 216, 0.18)",
     top: -120,
     right: -90,
   },

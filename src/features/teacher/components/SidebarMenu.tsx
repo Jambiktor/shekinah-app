@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Animated, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,6 +36,8 @@ const SidebarMenu = ({
   onLogout,
 }: SidebarMenuProps) => {
   const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   if (!isVisible) {
     return null;
   }
@@ -62,6 +64,7 @@ const SidebarMenu = ({
             width: menuWidth,
             backgroundColor: theme.colors.surface,
             borderRightColor: theme.colors.border,
+            shadowColor: theme.colors.text,
             transform: [
               {
                 translateX: menuProgress.interpolate({
@@ -76,7 +79,15 @@ const SidebarMenu = ({
         <SafeAreaView style={styles.menuSafeArea} edges={["top"]}>
           <View style={[styles.menuHeader, { borderBottomColor: theme.colors.border }]}>
             <View style={styles.profileRow}>
-              <View style={[styles.menuAvatar, { backgroundColor: theme.colors.background }]}>
+              <View
+                style={[
+                  styles.menuAvatar,
+                  {
+                    backgroundColor: `${theme.colors.primary}14`,
+                    borderColor: `${theme.colors.primary}33`,
+                  },
+                ]}
+              >
                 <Image
                   source={
                     theme.logo_url
@@ -89,7 +100,7 @@ const SidebarMenu = ({
               </View>
               <View>
                 <Text style={[styles.profileName, { color: theme.colors.text }]}>{profileName}</Text>
-                <Text style={[styles.profileRole, { color: theme.colors.text }]}>Teacher</Text>
+                <Text style={[styles.profileRole, { color: `${theme.colors.text}99` }]}>Teacher</Text>
               </View>
             </View>
           </View>
@@ -100,40 +111,41 @@ const SidebarMenu = ({
                 return (
                   <Pressable
                     key={item.tab}
-                    style={[
-                      styles.menuItem,
-                      { backgroundColor: theme.colors.surface },
-                      isActive && { backgroundColor: theme.colors.primary },
-                    ]}
-                      onPress={() => onSelectTab(item.tab)}
+                    style={[styles.menuItem, isActive && styles.menuItemActive]}
+                    onPress={() => onSelectTab(item.tab)}
+                  >
+                    <Ionicons
+                      name={item.icon}
+                      size={18}
+                      color={isActive ? theme.colors.surface : theme.colors.text}
+                    />
+                    <Text
+                      style={[
+                        styles.menuItemLabel,
+                        { color: isActive ? theme.colors.surface : theme.colors.text },
+                      ]}
                     >
-                      <Ionicons
-                        name={item.icon}
-                        size={18}
-                        color={isActive ? theme.colors.surface : theme.colors.text}
-                      />
-                      <Text
-                        style={[
-                          styles.menuItemLabel,
-                          { color: isActive ? theme.colors.surface : theme.colors.text },
-                          isActive && styles.menuItemLabelActive,
-                        ]}
-                      >
-                        {item.label}
-                      </Text>
-                    </Pressable>
-                  );
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                );
               })}
             </View>
             <View style={styles.menuFooter}>
               <Pressable
-                style={[styles.logoutButton, { borderColor: theme.colors.border }]}
+                style={[
+                  styles.logoutButton,
+                  {
+                    borderColor: `${theme.colors.accent}55`,
+                    backgroundColor: `${theme.colors.accent}12`,
+                  },
+                ]}
                 onPress={onLogout}
               >
                 <Ionicons name="log-out-outline" size={16} color={theme.colors.accent} />
                 <Text style={[styles.logoutText, { color: theme.colors.text }]}>Logout</Text>
               </Pressable>
-              <Text style={[styles.menuFooterText, { color: theme.colors.text }]}>
+              <Text style={[styles.menuFooterText, { color: `${theme.colors.text}99` }]}>
                 Version 1.0.0
               </Text>
             </View>
@@ -144,105 +156,111 @@ const SidebarMenu = ({
   );
 };
 
-const styles = StyleSheet.create({
-  menuOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: "row",
-  },
-  menuBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(26, 43, 60, 0.18)",
-  },
-  menuPanel: {
-    height: "100%",
-    borderRightWidth: 1,
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    shadowOffset: { width: 4, height: 0 },
-    elevation: 6,
-  },
-  menuSafeArea: {
-    flex: 1,
-  },
-  menuHeader: {
-    paddingTop: 16,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    gap: 16,
-  },
-  profileRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  menuAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  menuAvatarImage: {
-    width: 28,
-    height: 28,
-  },
-  profileName: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  profileRole: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  menuBody: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  menuList: {
-    paddingTop: 16,
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  menuFooter: {
-    marginTop: "auto",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    paddingTop: 12,
-    gap: 12,
-  },
-  logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    height: 44,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-  },
-  logoutText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  menuFooterText: {
-    fontSize: 11,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    height: 48,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    backgroundColor: "transparent",
-  },
-  menuItemActive: {},
-  menuItemLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  menuItemLabelActive: {},
-});
+const createStyles = (theme: import("../../../shared/theme/types").SchoolTheme) =>
+  StyleSheet.create({
+    menuOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      flexDirection: "row",
+    },
+    menuBackdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(26, 43, 60, 0.18)",
+    },
+    menuPanel: {
+      height: "100%",
+      borderRightWidth: 1,
+      shadowOpacity: 0.12,
+      shadowRadius: 14,
+      shadowOffset: { width: 4, height: 0 },
+      elevation: 6,
+    },
+    menuSafeArea: {
+      flex: 1,
+    },
+    menuHeader: {
+      paddingTop: 16,
+      paddingHorizontal: 20,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      gap: 16,
+    },
+    profileRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    menuAvatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+    },
+    menuAvatarImage: {
+      width: 28,
+      height: 28,
+    },
+    profileName: {
+      fontSize: 16,
+      fontWeight: "700",
+    },
+    profileRole: {
+      fontSize: 12,
+      marginTop: 2,
+    },
+    menuBody: {
+      flex: 1,
+      justifyContent: "space-between",
+    },
+    menuList: {
+      paddingTop: 16,
+      paddingHorizontal: 20,
+      gap: 8,
+    },
+    menuFooter: {
+      marginTop: "auto",
+      paddingHorizontal: 20,
+      paddingBottom: 20,
+      paddingTop: 12,
+      gap: 12,
+    },
+    logoutButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      height: 44,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      borderWidth: 1,
+    },
+    logoutText: {
+      fontSize: 13,
+      fontWeight: "600",
+    },
+    menuFooterText: {
+      fontSize: 11,
+    },
+    menuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      height: 48,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    menuItemActive: {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+    },
+    menuItemLabel: {
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    menuItemLabelActive: {},
+  });
 
 export default SidebarMenu;

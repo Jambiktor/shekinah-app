@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import RenderHtml from "react-native-render-html";
 
 import { Notification } from "../types";
 import { formatEmailDate } from "../../../shared/helpers/date";
+import { useTheme } from "../../../shared/theme/ThemeProvider";
 
 type Props = {
   email: Notification | null;
@@ -13,10 +14,22 @@ type Props = {
 
 const MessageScreen = ({ email, onBack }: Props) => {
   const { width } = useWindowDimensions();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const htmlStyles = useMemo(
+    () => ({
+      p: { marginTop: 0, marginBottom: 8, color: theme.colors.text, lineHeight: 20, fontSize: 14 },
+      a: { color: theme.colors.primary, textDecorationLine: "underline" },
+      ul: { paddingLeft: 18, marginTop: 0, marginBottom: 8 },
+      ol: { paddingLeft: 18, marginTop: 0, marginBottom: 8 },
+      li: { marginBottom: 4 },
+    }),
+    [theme]
+  );
   return (
     <View style={styles.container}>
       <Pressable style={styles.backButton} onPress={onBack}>
-        <Ionicons name="chevron-back" size={18} color="#1A73E8" />
+        <Ionicons name="chevron-back" size={18} color={theme.colors.primary} />
         <Text style={styles.backButtonText}>Back to Inbox</Text>
       </Pressable>
       {email ? (
@@ -68,133 +81,136 @@ const MessageScreen = ({ email, onBack }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-    backgroundColor: "#FFFFFF",
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 12,
-    marginTop: 12,
-  },
-  backButtonText: {
-    color: "#1A73E8",
-    fontWeight: "600",
-  },
-  messageContent: {
-    paddingBottom: 24,
-  },
-  messageHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  messageTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0F172A",
-    flex: 1,
-    paddingRight: 10,
-  },
-  statusPill: {
-    backgroundColor: "#22C55E",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-  },
-  statusPillText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  metaBlock: {
-    gap: 4,
-    marginBottom: 12,
-  },
-  messageMeta: {
-    fontSize: 13,
-    color: "#475569",
-  },
-  messageDivider: {
-    height: 1,
-    backgroundColor: "#E2E8F0",
-    marginBottom: 12,
-  },
-  messagePanel: {
-    borderRadius: 12,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  panelHeader: {
-    backgroundColor: "#3A8FB7",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    alignItems: "center",
-  },
-  panelHeaderText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  panelBody: {
-    padding: 12,
-    backgroundColor: "#FFFFFF",
-  },
-  quoteBlock: {
-    borderLeftWidth: 2,
-    borderLeftColor: "#3A8FB7",
-    paddingLeft: 10,
-  },
-  messageBody: {
-    fontSize: 14,
-    color: "#0F172A",
-    lineHeight: 20,
-  },
-  footerDivider: {
-    height: 1,
-    backgroundColor: "#E2E8F0",
-    marginTop: 16,
-    marginBottom: 12,
-  },
-  footer: {
-    alignItems: "center",
-    gap: 6,
-  },
-  footerText: {
-    fontSize: 12,
-    color: "#64748B",
-  },
-  footerLink: {
-    fontSize: 12,
-    color: "#1A73E8",
-    fontWeight: "600",
-  },
-  footerNote: {
-    fontSize: 11,
-    color: "#94A3B8",
-    textAlign: "center",
-  },
-  footerCopy: {
-    fontSize: 11,
-    color: "#94A3B8",
-  },
-  messageEmpty: {
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 200,
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#94A3B8",
-  },
-});
+const createStyles = (theme: import("../../../shared/theme/types").SchoolTheme) => {
+  const colors = theme.colors;
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: 16,
+      paddingBottom: 20,
+      backgroundColor: colors.background,
+    },
+    backButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginBottom: 12,
+      marginTop: 12,
+    },
+    backButtonText: {
+      color: colors.primary,
+      fontWeight: "600",
+    },
+    messageContent: {
+      paddingBottom: 24,
+    },
+    messageHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: 8,
+    },
+    messageTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: colors.text,
+      flex: 1,
+      paddingRight: 10,
+    },
+    statusPill: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 14,
+    },
+    statusPillText: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.surface,
+    },
+    metaBlock: {
+      gap: 4,
+      marginBottom: 12,
+    },
+    messageMeta: {
+      fontSize: 13,
+      color: `${colors.text}99`,
+    },
+    messageDivider: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginBottom: 12,
+    },
+    messagePanel: {
+      borderRadius: 12,
+      overflow: "hidden",
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    panelHeader: {
+      backgroundColor: colors.primary,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      alignItems: "center",
+    },
+    panelHeaderText: {
+      color: colors.surface,
+      fontSize: 14,
+      fontWeight: "700",
+    },
+    panelBody: {
+      padding: 12,
+      backgroundColor: colors.surface,
+    },
+    quoteBlock: {
+      borderLeftWidth: 2,
+      borderLeftColor: colors.primary,
+      paddingLeft: 10,
+    },
+    messageBody: {
+      fontSize: 14,
+      color: colors.text,
+      lineHeight: 20,
+    },
+    footerDivider: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginTop: 16,
+      marginBottom: 12,
+    },
+    footer: {
+      alignItems: "center",
+      gap: 6,
+    },
+    footerText: {
+      fontSize: 12,
+      color: `${colors.text}99`,
+    },
+    footerLink: {
+      fontSize: 12,
+      color: colors.primary,
+      fontWeight: "600",
+    },
+    footerNote: {
+      fontSize: 11,
+      color: `${colors.text}99`,
+      textAlign: "center",
+    },
+    footerCopy: {
+      fontSize: 11,
+      color: `${colors.text}99`,
+    },
+    messageEmpty: {
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: 200,
+    },
+    emptyText: {
+      textAlign: "center",
+      color: `${colors.text}99`,
+    },
+  });
+};
 
 const htmlStyles = {
   p: {

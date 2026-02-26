@@ -1,6 +1,7 @@
 import { apiFetch } from "../../../../shared/api/client";
 import { Child, LogEntry, Notification, ReportStats } from "../../types";
 import { buildLogsFormBody, mapAttendanceLogs, mapNotifications } from "../../helpers/logs";
+import { fetchChildPurchaseLogs } from "./purchases";
 
 type InboxResponse = {
   success: boolean;
@@ -61,6 +62,7 @@ const stripChildId = (label: string) => {
 export const fetchParentDashboard = async (): Promise<{
   notifications: Notification[];
   logs: LogEntry[];
+  purchaseLogs: LogEntry[];
   children: Child[];
   reports: ReportStats;
 }> => {
@@ -107,10 +109,17 @@ export const fetchParentDashboard = async (): Promise<{
     assignedSection: child.assigned_section ?? null,
   }));
 
-  const logs = await fetchLogsForChildren(children);
+  const [logs, purchaseLogs] = await Promise.all([
+    fetchLogsForChildren(children),
+    fetchChildPurchaseLogs(children).catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn("fetchChildPurchaseLogs failed", { message });
+      return [];
+    }),
+  ]);
   const reports = mapReportStats(reportsResponse, children);
 
-  return { notifications, logs, children, reports };
+  return { notifications, logs, purchaseLogs, children, reports };
 };
 
 const fetchLogsForChildren = async (children: Child[]): Promise<LogEntry[]> => {

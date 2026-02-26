@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../../shared/theme/ThemeProvider";
@@ -27,6 +27,7 @@ const AppHeader = ({
   const [showAvailabilityMenu, setShowAvailabilityMenu] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(0);
   const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const availabilityOptions: Array<{
     value: "Available" | "Busy" | "Offline";
     label: string;
@@ -34,7 +35,7 @@ const AppHeader = ({
   }> = [
     { value: "Available", label: "Available", color: "#16A34A" },
     { value: "Busy", label: "Busy", color: "#F59E0B" },
-    { value: "Offline", label: "Offline", color: "#64748B" },
+    { value: "Offline", label: "Offline", color: `${theme.colors.text}99` },
   ];
 
   return (
@@ -48,7 +49,7 @@ const AppHeader = ({
       {onMenuPress ? (
         <Pressable
           onPress={onMenuPress}
-          style={[styles.menuButton, { backgroundColor: theme.colors.background }]}
+          style={[styles.menuButton, { backgroundColor: `${theme.colors.primary}14` }]}
         >
           <Ionicons name="menu-outline" size={24} color={theme.colors.text} />
         </Pressable>
@@ -73,7 +74,7 @@ const AppHeader = ({
                     {
                       backgroundColor:
                         availabilityOptions.find((option) => option.value === availability)
-                          ?.color ?? "#64748B",
+                          ?.color ?? `${theme.colors.text}99`,
                     },
                   ]}
                 />
@@ -84,17 +85,22 @@ const AppHeader = ({
             <Pressable onPress={onNotificationPress} style={styles.iconBadgeWrap}>
               <Ionicons name="notifications" size={22} color={theme.colors.primary} />
               {notificationCount > 0 ? (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{notificationCount}</Text>
+                <View style={[styles.badge, { backgroundColor: theme.colors.accent }]}>
+                  <Text style={[styles.badgeText, { color: theme.colors.surface }]}>
+                    {notificationCount}
+                  </Text>
                 </View>
               ) : null}
             </Pressable>
           ) : null}
         </View>
       ) : onActionPress ? (
-        <Pressable onPress={onActionPress} style={styles.actionButton}>
-          <Ionicons name="log-out-outline" size={16} color="#FFFFFF" />
-          <Text style={styles.actionText}>Logout</Text>
+        <Pressable
+          onPress={onActionPress}
+          style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
+        >
+          <Ionicons name="log-out-outline" size={16} color={theme.colors.surface} />
+          <Text style={[styles.actionText, { color: theme.colors.surface }]}>Logout</Text>
         </Pressable>
       ) : (
         <View style={styles.navSpacer} />
@@ -110,7 +116,12 @@ const AppHeader = ({
               style={StyleSheet.absoluteFill}
               onPress={() => setShowAvailabilityMenu(false)}
             />
-            <View style={[styles.availabilityMenu, { top: headerHeight + 6, right: 16 }]}>
+            <View
+              style={[
+                styles.availabilityMenu,
+                { top: headerHeight + 6, right: 16, shadowColor: theme.colors.text },
+              ]}
+            >
               {availabilityOptions.map((option) => {
                 const isActive = availability === option.value;
                 return (
@@ -122,14 +133,15 @@ const AppHeader = ({
                     }}
                     style={[
                       styles.availabilityMenuItem,
-                      isActive && styles.availabilityMenuItemActive,
+                      isActive && { backgroundColor: `${theme.colors.primary}12` },
                     ]}
                   >
                     <View style={[styles.availabilityMenuDot, { backgroundColor: option.color }]} />
                     <Text
                       style={[
                         styles.availabilityMenuText,
-                        isActive && styles.availabilityMenuTextActive,
+                        { color: theme.colors.text },
+                        isActive && { color: theme.colors.primary },
                       ]}
                     >
                       {option.label}
@@ -145,146 +157,131 @@ const AppHeader = ({
   );
 };
 
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E8ECEF",
-  },
-  brand: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    marginRight: 8,
-  },
-  menuButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F5F7FA",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  navTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1A2B3C",
-  },
-  iconBadgeWrap: {
-    width: 32,
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rightActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  availabilityWrap: {
-    position: "relative",
-    zIndex: 2,
-  },
-  availabilityIconButton: {
-    width: 32,
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  availabilityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    position: "absolute",
-    bottom: 4,
-    right: 4,
-    borderWidth: 1,
-    borderColor: "#FFFFFF",
-  },
-  availabilityModalRoot: {
-    flex: 1,
-  },
-  availabilityMenu: {
-    position: "absolute",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 6,
-    borderWidth: 1,
-    borderColor: "#E8ECEF",
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
-    minWidth: 140,
-  },
-  availabilityMenuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
-  availabilityMenuItemActive: {
-    backgroundColor: "#F1F5F9",
-  },
-  availabilityMenuDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  availabilityMenuText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#1A2B3C",
-  },
-  availabilityMenuTextActive: {
-    color: "#0F172A",
-  },
-  badge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#E02424",
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-    position: "absolute",
-    top: -6,
-    right: -6,
-  },
-  badgeText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "700",
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    height: 32,
-    borderRadius: 12,
-    backgroundColor: "#DC2626",
-    gap: 6,
-  },
-  actionText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 12,
-  },
-  navSpacer: {
-    width: 32,
-    height: 32,
-  },
-});
+const createStyles = (theme: import("../../../shared/theme/types").SchoolTheme) =>
+  StyleSheet.create({
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      paddingBottom: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderBottomWidth: 1,
+    },
+    brand: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+      marginRight: 8,
+    },
+    menuButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 8,
+    },
+    navTitle: {
+      fontSize: 15,
+      fontWeight: "700",
+    },
+    iconBadgeWrap: {
+      width: 32,
+      height: 32,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    rightActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    availabilityWrap: {
+      position: "relative",
+      zIndex: 2,
+    },
+    availabilityIconButton: {
+      width: 32,
+      height: 32,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    availabilityDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      position: "absolute",
+      bottom: 4,
+      right: 4,
+      borderWidth: 1,
+      borderColor: theme.colors.surface,
+    },
+    availabilityModalRoot: {
+      flex: 1,
+    },
+    availabilityMenu: {
+      position: "absolute",
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      shadowOpacity: 0.12,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 6,
+      minWidth: 140,
+    },
+    availabilityMenuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      borderRadius: 10,
+    },
+    availabilityMenuDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    availabilityMenuText: {
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    badge: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2,
+      borderColor: theme.colors.surface,
+      position: "absolute",
+      top: -6,
+      right: -6,
+    },
+    badgeText: {
+      fontSize: 10,
+      fontWeight: "700",
+    },
+    actionButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 12,
+      height: 32,
+      borderRadius: 12,
+      gap: 6,
+    },
+    actionText: {
+      fontWeight: "600",
+      fontSize: 12,
+    },
+    navSpacer: {
+      width: 32,
+      height: 32,
+    },
+  });
 
-export default AppHeader;
+export default React.memo(AppHeader);

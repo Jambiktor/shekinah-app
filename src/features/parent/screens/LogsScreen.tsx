@@ -81,6 +81,17 @@ const formatDateKey = (value: string) => {
   });
 };
 
+const splitPurchaseMeta = (value: string) => {
+  const parts = value
+    .split("•")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  return {
+    primary: parts[0] ?? value,
+    secondary: parts.slice(1).join(" • "),
+  };
+};
+
 const LogsScreen = ({
   logs,
   childOptions,
@@ -160,7 +171,8 @@ const LogsScreen = ({
       (log) =>
         log.childName.toLowerCase().includes(query) ||
         log.dateLogged.toLowerCase().includes(query) ||
-        log.logType.toLowerCase().includes(query)
+        log.logType.toLowerCase().includes(query) ||
+        (log.location || "").toLowerCase().includes(query)
     );
   }, [logsByDate, searchText, selectedDateKey]);
 
@@ -374,29 +386,61 @@ const LogsScreen = ({
             const isIn = log.logType === "IN";
             const isAbsent = log.logType === "ABSENT";
             const isOut = log.logType === "OUT";
+            const isPurchase = log.logType === "PURCHASE";
+            const purchaseMeta = isPurchase && log.location ? splitPurchaseMeta(log.location) : null;
             return (
               <View key={log.id} style={styles.logRow}>
                 <View style={styles.logMeta}>
-                  {selectedChildId === "all" ? (
+                  {selectedChildId === "all" && !isPurchase ? (
                     <Text style={styles.logName}>{log.childName}</Text>
                   ) : null}
                   <Text style={styles.logDate}>{date}</Text>
                   <Text style={styles.logTime}>{time}</Text>
+                  {purchaseMeta ? (
+                    <>
+                      <Text style={styles.logPurchasePrimary}>{purchaseMeta.primary}</Text>
+                      {purchaseMeta.secondary ? (
+                        <Text style={styles.logPurchaseSecondary}>{purchaseMeta.secondary}</Text>
+                      ) : null}
+                    </>
+                  ) : null}
                 </View>
                 <View style={styles.logStatus}>
                   <View
                     style={[
                       styles.statusPill,
-                      isIn ? styles.inPill : isAbsent ? styles.absentPill : styles.outPill,
+                      isPurchase
+                        ? styles.purchasePill
+                        : isIn
+                          ? styles.inPill
+                          : isAbsent
+                            ? styles.absentPill
+                            : styles.outPill,
                     ]}
                   >
                     <Ionicons
-                      name={isIn ? "log-in-outline" : isAbsent ? "close-circle-outline" : "log-out-outline"}
+                      name={
+                        isPurchase
+                          ? "cart-outline"
+                          : isIn
+                            ? "log-in-outline"
+                            : isAbsent
+                              ? "close-circle-outline"
+                              : "log-out-outline"
+                      }
                       size={14}
                       color="#FFFFFF"
                     />
                     <Text style={styles.statusText}>
-                      {isIn ? "In" : isAbsent ? "Absent" : isOut ? "Out" : "Out"}
+                      {isPurchase
+                        ? "Purchase"
+                        : isIn
+                          ? "In"
+                          : isAbsent
+                            ? "Absent"
+                            : isOut
+                              ? "Out"
+                              : "Out"}
                     </Text>
                   </View>
                 </View>
@@ -641,6 +685,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#94A3B8",
   },
+  logPurchasePrimary: {
+    fontSize: 14,
+    color: "#0F172A",
+    fontWeight: "800",
+    marginTop: 2,
+  },
+  logPurchaseSecondary: {
+    fontSize: 11,
+    color: "#64748B",
+    fontWeight: "700",
+  },
   logStatus: {
     width: 86,
     alignItems: "flex-end",
@@ -660,6 +715,9 @@ const styles = StyleSheet.create({
   },
   outPill: {
     backgroundColor: "#EF4444",
+  },
+  purchasePill: {
+    backgroundColor: "#D97706",
   },
   absentPill: {
     backgroundColor: "#DC2626",

@@ -2,6 +2,8 @@ import { ReportStats as ReportStatsBase } from "../../../types/reports";
 
 export type ScreenKey =
   | "dashboard"
+  | "ledger"
+  | "purchases"
   | "inbox"
   | "message"
   | "logs"
@@ -22,7 +24,7 @@ export type Notification = {
   emailMessage: string;
 };
 
-export type LogStatus = "IN" | "OUT" | "ABSENT";
+export type LogStatus = "IN" | "OUT" | "ABSENT" | "PURCHASE";
 
 export type LogEntry = {
   id: string;
@@ -64,4 +66,33 @@ export type ParentProfile = {
   name: string;
   email: string;
   role: string;
+};
+
+export type LedgerFeeItem = {
+  name: string;
+  amount: number;
+  dueDate: string | null;
+};
+
+export type LedgerPayment = {
+  id: number;
+  amount: number;
+  method: string;
+  referenceNumber: string | null;
+  receiptNumber: string | null;
+  date: string | null;
+  schoolYear: string | null;
+  semester: string | null;
+};
+
+export type LedgerData = {
+  studentId: string;
+  studentName: string;
+  gradeLevel: string;
+  totalBilled: number;
+  totalPaid: number;
+  balance: number;
+  feeItems: LedgerFeeItem[];
+  lastPayment: Omit<LedgerPayment, "id" | "schoolYear" | "semester"> | null;
+  payments: LedgerPayment[];
 };
