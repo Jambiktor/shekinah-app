@@ -3,7 +3,7 @@ import { AuthProfile } from "../../types/auth";
 
 const STORAGE_KEY = "shekinah_auth_v1";
 
-type StoredAuthSession = {
+export type StoredAuthSession = {
   profile: AuthProfile;
   teacherLevels?: unknown[];
   sessionCookie?: string | null;

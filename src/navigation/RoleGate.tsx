@@ -4,7 +4,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import LoginScreen from "../shared/ui/LoginScreen";
 import { loginWithRole, readAuthTokens } from "../shared/auth/login";
-import { clearAuthSession, loadAuthSession, saveAuthSession } from "../shared/storage/authSession";
+import {
+  clearAuthSession,
+  loadAuthSession,
+  saveAuthSession,
+  StoredAuthSession,
+} from "../shared/storage/authSession";
 import { setAccessToken, setSessionCookie } from "../shared/api/client";
 import ParentStack from "./ParentStack";
 import TeacherStack from "./TeacherStack";
@@ -22,12 +27,19 @@ const normalizeTeacherLevels = (levels: unknown[] | undefined): TeacherLevel[] =
   return Array.isArray(levels) ? (levels as TeacherLevel[]) : [];
 };
 
-const RoleGate = () => {
-  const [profile, setProfile] = useState<AuthProfile | null>(null);
-  const [teacherLevels, setTeacherLevels] = useState<TeacherLevel[]>([]);
+type RoleGateProps = {
+  initialSession?: StoredAuthSession | null;
+};
+
+const RoleGate = ({ initialSession }: RoleGateProps) => {
+  const hasInitialSessionSnapshot = initialSession !== undefined;
+  const [profile, setProfile] = useState<AuthProfile | null>(initialSession?.profile ?? null);
+  const [teacherLevels, setTeacherLevels] = useState<TeacherLevel[]>(
+    normalizeTeacherLevels(initialSession?.teacherLevels)
+  );
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [isSessionRestoring, setIsSessionRestoring] = useState(true);
+  const [isSessionRestoring, setIsSessionRestoring] = useState(!hasInitialSessionSnapshot);
   const [loginEventId, setLoginEventId] = useState(0);
   const [isSplashImageLoaded, setSplashImageLoaded] = useState(false);
   const { theme, refreshTheme, isLoading: isThemeLoading } = useTheme();
@@ -35,6 +47,22 @@ const RoleGate = () => {
   const shouldShowSplash = !profile && (isSessionRestoring || isThemeLoading || !isSplashImageLoaded);
 
   useEffect(() => {
+    if (!hasInitialSessionSnapshot) {
+      return;
+    }
+    setSessionCookie(initialSession?.sessionCookie ?? null);
+    setAccessToken(initialSession?.accessToken ?? null);
+    setProfile(initialSession?.profile ?? null);
+    setTeacherLevels(normalizeTeacherLevels(initialSession?.teacherLevels));
+    setIsSessionRestoring(false);
+  }, [hasInitialSessionSnapshot, initialSession]);
+
+  useEffect(() => {
+    if (hasInitialSessionSnapshot) {
+      setIsSessionRestoring(false);
+      return;
+    }
+
     let isMounted = true;
     const restoreSession = async () => {
       setIsSessionRestoring(true);
@@ -57,7 +85,7 @@ const RoleGate = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [hasInitialSessionSnapshot]);
 
   // Refresh theme when role (module) changes.
   useEffect(() => {

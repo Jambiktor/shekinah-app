@@ -1,5 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Image, StatusBar, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Easing,
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { requireOptionalNativeModule } from "expo-modules-core";
 import * as Font from "expo-font";
@@ -10,6 +20,8 @@ import ThemeProvider from "./src/shared/theme/ThemeProvider";
 import { getEnvString } from "./src/shared/config/env";
 import { fetchSchoolTheme, getDefaultTheme } from "./src/shared/theme/service";
 import { SchoolTheme } from "./src/shared/theme/types";
+import { setAccessToken, setSessionCookie } from "./src/shared/api/client";
+import { loadAuthSession, StoredAuthSession } from "./src/shared/storage/authSession";
 
 type ExpoUpdatesLikeModule = {
   isEnabled?: boolean;
@@ -20,7 +32,7 @@ type ExpoUpdatesLikeModule = {
 
 const updatesModule = requireOptionalNativeModule<ExpoUpdatesLikeModule>("ExpoUpdates");
 let hasPromptedUpdateThisSession = false;
-const STARTUP_TIMEOUT_MS = 12000;
+const MIN_BOOT_DURATION_MS = 2000;
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -72,17 +84,85 @@ const warmStartupTheme = async (): Promise<SchoolTheme | null> => {
   return fulfilledThemes[0] ?? null;
 };
 
-const StartupPreloader = ({ theme }: { theme: SchoolTheme }) => {
+const StartupPreloader = ({
+  theme,
+  progress,
+}: {
+  theme: SchoolTheme;
+  progress: Animated.Value;
+}) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const pulseProgress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseProgress, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseProgress, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulseProgress]);
+
+  const logoScale = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.88, 1],
+  });
+  const logoOpacity = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.2, 1],
+  });
+  const taglineOpacity = progress.interpolate({
+    inputRange: [0, 0.65, 1],
+    outputRange: [0, 0.45, 1],
+  });
+  const pulseScale = pulseProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.35],
+  });
+  const pulseOpacity = pulseProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.26, 0],
+  });
+
   return (
     <View style={styles.preloaderRoot}>
-      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
       <View style={styles.backgroundGlowTop} />
       <View style={styles.backgroundGlowBottom} />
       <View style={styles.preloaderContent}>
-        <Image source={require("./assets/holy-nazarene.jpeg")} style={styles.preloaderLogo} />
+        <Animated.View
+          style={[
+            styles.pulseRing,
+            {
+              opacity: pulseOpacity,
+              transform: [{ scale: pulseScale }],
+            },
+          ]}
+        />
+        <Animated.View
+          style={{
+            opacity: logoOpacity,
+            transform: [{ scale: logoScale }],
+          }}
+        >
+          <Image source={require("./assets/holy-nazarene.jpeg")} style={styles.preloaderLogo} />
+        </Animated.View>
         <Text style={styles.preloaderTitle}>Holy Nazarene</Text>
         <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Animated.Text style={[styles.preloaderTagline, { opacity: taglineOpacity }]}>
+          Powered by Eunika Academe
+        </Animated.Text>
       </View>
     </View>
   );
@@ -91,30 +171,63 @@ const StartupPreloader = ({ theme }: { theme: SchoolTheme }) => {
 export default function App() {
   const [isBootstrapped, setIsBootstrapped] = useState(false);
   const [bootTheme, setBootTheme] = useState<SchoolTheme>(getDefaultTheme());
+  const [bootSession, setBootSession] = useState<StoredAuthSession | null | undefined>(undefined);
+  const bootAnimationProgress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(bootAnimationProgress, {
+      toValue: 1,
+      duration: 900,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, [bootAnimationProgress]);
 
   useEffect(() => {
     let isMounted = true;
 
     const bootstrapApp = async () => {
-      const prepare = async () => {
-        const [, warmedTheme] = await Promise.allSettled([
-          preloadAssets(),
-          warmStartupTheme(),
-        ]);
-        if (
-          isMounted &&
-          warmedTheme.status === "fulfilled" &&
-          warmedTheme.value
-        ) {
-          setBootTheme(warmedTheme.value);
-        }
-      };
+      const minimumBootTask = delay(MIN_BOOT_DURATION_MS);
 
       try {
-        await Promise.race([prepare(), delay(STARTUP_TIMEOUT_MS)]);
+        const [assetsResult, themeResult, sessionResult] = await Promise.allSettled([
+          preloadAssets(),
+          warmStartupTheme(),
+          loadAuthSession(),
+        ]);
+
+        if (assetsResult.status === "rejected") {
+          console.warn("startup asset preload failed", assetsResult.reason);
+        }
+
+        if (isMounted) {
+          if (themeResult.status === "fulfilled" && themeResult.value) {
+            setBootTheme(themeResult.value);
+          } else if (themeResult.status === "rejected") {
+            console.warn("startup theme warmup failed", themeResult.reason);
+          }
+
+          if (sessionResult.status === "fulfilled") {
+            const session = sessionResult.value ?? null;
+            setBootSession(session);
+            setSessionCookie(session?.sessionCookie ?? null);
+            setAccessToken(session?.accessToken ?? null);
+          } else {
+            console.warn("startup session restore failed", sessionResult.reason);
+            setBootSession(null);
+            setSessionCookie(null);
+            setAccessToken(null);
+          }
+        }
       } catch (error) {
         console.warn("startup bootstrap failed", error);
+        if (isMounted) {
+          setBootSession(null);
+          setSessionCookie(null);
+          setAccessToken(null);
+        }
       } finally {
+        await minimumBootTask;
         if (isMounted) {
           setIsBootstrapped(true);
         }
@@ -197,7 +310,7 @@ export default function App() {
   if (!isBootstrapped) {
     return (
       <SafeAreaProvider>
-        <StartupPreloader theme={bootTheme} />
+        <StartupPreloader theme={bootTheme} progress={bootAnimationProgress} />
       </SafeAreaProvider>
     );
   }
@@ -205,7 +318,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider initialTheme={bootTheme}>
-        <RoleGate />
+        <RoleGate initialSession={bootSession} />
       </ThemeProvider>
     </SafeAreaProvider>
   );
@@ -215,14 +328,14 @@ const createStyles = (theme: SchoolTheme) =>
   StyleSheet.create({
     preloaderRoot: {
       flex: 1,
-      backgroundColor: "transparent",
+      backgroundColor: "#F8FAFC",
     },
     backgroundGlowTop: {
       position: "absolute",
       width: 320,
       height: 320,
       borderRadius: 160,
-      backgroundColor: `${theme.colors.primary}33`,
+      backgroundColor: `${theme.colors.primary}1F`,
       top: -120,
       right: -90,
     },
@@ -231,7 +344,7 @@ const createStyles = (theme: SchoolTheme) =>
       width: 380,
       height: 380,
       borderRadius: 190,
-      backgroundColor: `${theme.colors.secondary}26`,
+      backgroundColor: `${theme.colors.secondary}14`,
       bottom: -160,
       left: -120,
     },
@@ -250,5 +363,19 @@ const createStyles = (theme: SchoolTheme) =>
       color: "#0F172A",
       fontSize: 20,
       fontWeight: "700",
+    },
+    pulseRing: {
+      position: "absolute",
+      width: 130,
+      height: 130,
+      borderRadius: 65,
+      backgroundColor: `${theme.colors.primary}2E`,
+    },
+    preloaderTagline: {
+      marginTop: 2,
+      color: "#475569",
+      fontSize: 13,
+      fontWeight: "600",
+      letterSpacing: 0.2,
     },
   });
